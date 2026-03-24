@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookingModal, type BookableSession } from "@/components/BookingModal";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nContext";
 import { MapPin, Clock, Dumbbell, Users, ChevronRight, Quote, ExternalLink } from "lucide-react";
 
 import heroImg640 from "@/assets/hero-training-w640.jpg";
@@ -15,16 +16,16 @@ import communityOutdoorImg from "@/assets/community-outdoor.jpg";
 import communityStudioImg from "@/assets/community-studio.jpg";
 
 const CLASSES = [
-  { name: "Barbell Strength", focus: "Strength", location: "Studio", day: "Mon", time: "07:00", duration: "60 min", spots: 3 },
-  { name: "Conditioning Circuit", focus: "Conditioning", location: "Outdoor", day: "Mon", time: "18:00", duration: "45 min", spots: 5 },
-  { name: "Upper Body Power", focus: "Strength", location: "Studio", day: "Tue", time: "08:00", duration: "60 min", spots: 2 },
-  { name: "Beach HIIT", focus: "Conditioning", location: "Outdoor", day: "Wed", time: "07:00", duration: "45 min", spots: 6 },
-  { name: "Full Body Strength", focus: "Strength", location: "Studio", day: "Wed", time: "19:00", duration: "60 min", spots: 1 },
-  { name: "Mobility & Recovery", focus: "Mobility", location: "Studio", day: "Thu", time: "09:00", duration: "50 min", spots: 4 },
-  { name: "Park Strength", focus: "Strength", location: "Outdoor", day: "Fri", time: "07:00", duration: "60 min", spots: 4 },
-  { name: "Saturday Grind", focus: "Conditioning", location: "Outdoor", day: "Sat", time: "09:00", duration: "60 min", spots: 8 },
-  { name: "Peak Hour Strength", focus: "Strength", location: "Studio", day: "Sat", time: "10:30", duration: "60 min", spots: 0 },
-];
+  { id: "barbellStrength", focus: "Strength", location: "Studio", day: "Mon", time: "07:00", duration: "60 min", spots: 3 },
+  { id: "conditioningCircuit", focus: "Conditioning", location: "Outdoor", day: "Mon", time: "18:00", duration: "45 min", spots: 5 },
+  { id: "upperBodyPower", focus: "Strength", location: "Studio", day: "Tue", time: "08:00", duration: "60 min", spots: 2 },
+  { id: "beachHiit", focus: "Conditioning", location: "Outdoor", day: "Wed", time: "07:00", duration: "45 min", spots: 6 },
+  { id: "fullBodyStrength", focus: "Strength", location: "Studio", day: "Wed", time: "19:00", duration: "60 min", spots: 1 },
+  { id: "mobilityRecovery", focus: "Mobility", location: "Studio", day: "Thu", time: "09:00", duration: "50 min", spots: 4 },
+  { id: "parkStrength", focus: "Strength", location: "Outdoor", day: "Fri", time: "07:00", duration: "60 min", spots: 4 },
+  { id: "saturdayGrind", focus: "Conditioning", location: "Outdoor", day: "Sat", time: "09:00", duration: "60 min", spots: 8 },
+  { id: "peakHourStrength", focus: "Strength", location: "Studio", day: "Sat", time: "10:30", duration: "60 min", spots: 0 },
+] as const;
 
 const DAY_ORDER = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
@@ -34,26 +35,31 @@ type DayFilter = "all" | (typeof DAY_ORDER)[number];
 
 type ScheduleRow = (typeof CLASSES)[number];
 
-/** Approximate pins for directions (replace with your exact studio address when ready). */
-const DIRECTIONS = {
+/** Approximate pins (replace with your exact studio address when ready). */
+const MAP_URLS = {
   studio: {
-    label: "Studio — Eixample",
     google: "https://www.google.com/maps/search/?api=1&query=41.3944,2.1636",
     apple: "https://maps.apple.com/?ll=41.3944,2.1636&q=Eixample%20Barcelona",
   },
   outdoorSample: {
-    label: "Outdoor — Parc de la Ciutadella",
     google: "https://www.google.com/maps/search/?api=1&query=41.3888,2.1869",
     apple: "https://maps.apple.com/?ll=41.3888,2.1869&q=Parc%20de%20la%20Ciutadella",
   },
 } as const;
 
-const TESTIMONIALS = [
-  { text: "Structured, efficient, no wasted time. Exactly what I needed.", name: "Laura", age: 31, role: "Product Manager" },
-  { text: "I've trained with coaches before. Alex is the first one I've stuck with.", name: "Tom", age: 38, role: "Software Engineer" },
-  { text: "The outdoor sessions changed how I think about training entirely.", name: "María", age: 29, role: "Architect" },
-  { text: "Three months in and I'm stronger than I've been in years.", name: "James", age: 42, role: "Finance Director" },
-];
+const TESTIMONIAL_IDS = ["laura", "tom", "maria", "james"] as const;
+const TESTIMONIAL_PEOPLE: Record<(typeof TESTIMONIAL_IDS)[number], { name: string; age: number }> = {
+  laura: { name: "Laura", age: 31 },
+  tom: { name: "Tom", age: 38 },
+  maria: { name: "María", age: 29 },
+  james: { name: "James", age: 42 },
+};
+
+const FOCUS_MSG: Record<ScheduleRow["focus"], string> = {
+  Strength: "schedule.focusStrength",
+  Conditioning: "schedule.focusConditioning",
+  Mobility: "schedule.focusMobility",
+};
 
 const focusColor = (focus: string) => {
   if (focus === "Strength") return "bg-primary/15 text-primary border-primary/30";
@@ -68,20 +74,24 @@ function SectionEyebrow({ children }: { children: ReactNode }) {
 }
 
 export default function Index() {
+  const { t, locale, setLocale } = useI18n();
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<BookableSession | null>(null);
   const [locationFilter, setLocationFilter] = useState<LocationFilter>("all");
   const [focusFilter, setFocusFilter] = useState<FocusFilter>("all");
   const [dayFilter, setDayFilter] = useState<DayFilter>("all");
 
+  const locLabel = (loc: ScheduleRow["location"]) =>
+    loc === "Studio" ? t("schedule.locationStudio") : t("schedule.locationOutdoor");
+
   const openBooking = (row?: ScheduleRow) => {
     setSelectedSession(
       row
         ? {
-            name: row.name,
+            name: t(`classes.${row.id}.name`),
             day: row.day,
             time: row.time,
-            location: row.location,
+            location: locLabel(row.location),
             duration: row.duration,
           }
         : null,
@@ -105,12 +115,13 @@ export default function Index() {
 
   const scheduleLiveMessage = useMemo(() => {
     const n = filteredClasses.length;
-    if (n === 0) return "No sessions match your filters.";
-    return `Showing ${n} session${n === 1 ? "" : "s"}.`;
-  }, [filteredClasses.length]);
+    if (n === 0) return t("schedule.liveNone");
+    if (n === 1) return t("schedule.liveOne");
+    return t("schedule.liveCount", { n });
+  }, [filteredClasses.length, t]);
 
   const groupedByDay = useMemo(() => {
-    const map = new Map<string, typeof CLASSES>();
+    const map = new Map<string, ScheduleRow[]>();
     for (const day of DAY_ORDER) {
       const rows = filteredClasses.filter((c) => c.day === day);
       if (rows.length) map.set(day, rows);
@@ -124,27 +135,59 @@ export default function Index() {
     <div className="min-h-screen bg-background text-foreground">
       {/* ───── STICKY NAV ───── */}
       <header className="fixed top-0 left-0 right-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/75">
-        <div className="container h-14 flex items-center justify-between">
-          <a href="#top" className="font-display text-sm sm:text-base font-semibold tracking-tight rounded-sm">
+        <div className="container h-14 flex items-center justify-between gap-2">
+          <a href="#top" className="font-display text-sm sm:text-base font-semibold tracking-tight rounded-sm shrink-0">
             Alex Moreno
           </a>
-          <nav className="hidden sm:flex items-center gap-5 text-sm" aria-label="Primary">
+          <nav className="hidden sm:flex items-center gap-5 text-sm" aria-label={t("nav.primary")}>
             <a href="#schedule" className="text-muted-foreground hover:text-foreground transition-colors rounded-sm">
-              Schedule
+              {t("nav.schedule")}
             </a>
             <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors rounded-sm">
-              About
+              {t("nav.about")}
             </a>
             <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors rounded-sm">
-              Testimonials
+              {t("nav.testimonials")}
             </a>
             <a href="#practical-info" className="text-muted-foreground hover:text-foreground transition-colors rounded-sm">
-              Info
+              {t("nav.info")}
             </a>
           </nav>
-          <Button size="sm" className="h-9 px-4 font-display bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => openBooking()}>
-            Book
-          </Button>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div
+              className="flex items-center rounded-md border border-border bg-background/80 p-0.5"
+              role="group"
+              aria-label={t("lang.switch")}
+            >
+              <Button
+                type="button"
+                variant={locale === "en" ? "secondary" : "ghost"}
+                size="sm"
+                className="h-8 px-2.5 text-xs font-display"
+                onClick={() => setLocale("en")}
+                aria-pressed={locale === "en"}
+              >
+                EN
+              </Button>
+              <Button
+                type="button"
+                variant={locale === "es" ? "secondary" : "ghost"}
+                size="sm"
+                className="h-8 px-2.5 text-xs font-display"
+                onClick={() => setLocale("es")}
+                aria-pressed={locale === "es"}
+              >
+                ES
+              </Button>
+            </div>
+            <Button
+              size="sm"
+              className="h-9 px-3 sm:px-4 font-display bg-primary text-primary-foreground hover:bg-primary/90 shrink-0"
+              onClick={() => openBooking()}
+            >
+              {t("nav.book")}
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -163,7 +206,7 @@ export default function Index() {
           src={heroImg1920}
           srcSet={heroSrcSet}
           sizes="100vw"
-          alt="Strength training session"
+          alt={t("hero.heroImageAlt")}
           width={1920}
           height={1080}
           fetchPriority="high"
@@ -172,17 +215,16 @@ export default function Index() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
         <div className="relative z-10 container max-w-3xl text-center px-6 py-32">
-          <SectionEyebrow>Barcelona · Strength &amp; conditioning</SectionEyebrow>
+          <SectionEyebrow>{t("hero.eyebrow")}</SectionEyebrow>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
-            Stronger. More Consistent.<br />
-            <span className="text-primary">More Efficient.</span>
+            {t("hero.titleLine1")}
+            <br />
+            <span className="text-primary">{t("hero.titleLine2")}</span>
           </h1>
-          <p className="text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto mb-10">
-            Structured strength &amp; conditioning — indoor studio or outdoor across Barcelona.
-          </p>
+          <p className="text-muted-foreground text-lg sm:text-xl max-w-xl mx-auto mb-10">{t("hero.intro")}</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-base px-8 h-12" onClick={() => openBooking()}>
-              Book Your Session
+              {t("hero.bookSession")}
               <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
             <div className="flex items-center gap-4">
@@ -190,13 +232,13 @@ export default function Index() {
                 href="#schedule"
                 className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4 rounded-sm"
               >
-                View Schedule
+                {t("hero.viewSchedule")}
               </a>
               <a
                 href="#about"
                 className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4 rounded-sm"
               >
-                About Alex
+                {t("hero.aboutAlex")}
               </a>
             </div>
           </div>
@@ -209,13 +251,14 @@ export default function Index() {
         className="py-20 sm:py-28 scroll-mt-20 sm:scroll-mt-24"
         aria-labelledby="schedule-heading"
         role="region"
+        aria-label={t("schedule.ariaRegion")}
       >
         <div className="container rounded-xl border border-border/70 bg-card/25 shadow-sm shadow-black/20 px-4 py-8 sm:px-8 sm:py-10">
-          <SectionEyebrow>Training week</SectionEyebrow>
+          <SectionEyebrow>{t("schedule.eyebrow")}</SectionEyebrow>
           <h2 id="schedule-heading" className="font-display text-3xl sm:text-4xl font-bold mb-2">
-            Weekly Schedule
+            {t("schedule.title")}
           </h2>
-          <p className="text-muted-foreground mb-8">Select a session and book your spot.</p>
+          <p className="text-muted-foreground mb-8">{t("schedule.subtitle")}</p>
 
           <p className="sr-only" aria-live="polite" aria-atomic="true">
             {scheduleLiveMessage}
@@ -224,7 +267,7 @@ export default function Index() {
           <div className="space-y-6 mb-8">
             <div>
               <p id="schedule-day-label" className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                Day
+                {t("schedule.filterDay")}
               </p>
               <div
                 className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 sm:flex-wrap sm:overflow-visible"
@@ -243,7 +286,7 @@ export default function Index() {
                     )}
                     onClick={() => setDayFilter(d)}
                   >
-                    {d === "all" ? "All days" : d}
+                    {d === "all" ? t("schedule.allDays") : t(`days.${d}`)}
                   </Button>
                 ))}
               </div>
@@ -251,7 +294,7 @@ export default function Index() {
 
             <div>
               <p id="schedule-location-label" className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                Location
+                {t("schedule.filterLocation")}
               </p>
               <div className="flex flex-wrap gap-2" role="group" aria-labelledby="schedule-location-label">
                 {(["all", "Studio", "Outdoor"] as const).map((loc) => (
@@ -266,7 +309,7 @@ export default function Index() {
                     )}
                     onClick={() => setLocationFilter(loc)}
                   >
-                    {loc === "all" ? "All" : loc}
+                    {loc === "all" ? t("schedule.all") : locLabel(loc)}
                   </Button>
                 ))}
               </div>
@@ -274,7 +317,7 @@ export default function Index() {
 
             <div>
               <p id="schedule-focus-label" className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                Focus
+                {t("schedule.filterFocus")}
               </p>
               <div className="flex flex-wrap gap-2" role="group" aria-labelledby="schedule-focus-label">
                 {(["all", "Strength", "Conditioning", "Mobility"] as const).map((f) => (
@@ -289,7 +332,7 @@ export default function Index() {
                     )}
                     onClick={() => setFocusFilter(f)}
                   >
-                    {f === "all" ? "All" : f}
+                    {f === "all" ? t("schedule.all") : t(FOCUS_MSG[f])}
                   </Button>
                 ))}
               </div>
@@ -299,21 +342,23 @@ export default function Index() {
           <div className="grid gap-8">
             {groupedByDay.size === 0 ? (
               <p className="text-sm text-muted-foreground rounded-lg border border-border bg-card/40 px-4 py-6 text-center">
-                No sessions match these filters. Try clearing a filter or pick another day.
+                {t("schedule.noMatch")}
               </p>
             ) : (
               Array.from(groupedByDay.entries()).map(([day, rows]) => (
                 <div key={day}>
                   <h3 className="font-display text-lg font-semibold text-foreground/95 mb-3 border-b border-border pb-2">
-                    {day}
+                    {t(`days.${day}`)}
                   </h3>
                   <div className="grid gap-3 sm:gap-4">
                     {rows.map((c) => {
                       const isFull = c.spots === 0;
                       const lastSpots = !isFull && c.spots <= 2;
+                      const classNameTr = t(`classes.${c.id}.name`);
+                      const dayTr = t(`days.${c.day}`);
                       return (
                         <article
-                          key={`${c.name}-${c.day}-${c.time}`}
+                          key={`${c.id}-${c.day}-${c.time}`}
                           className={cn(
                             "bg-card border rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 transition-colors",
                             isFull
@@ -324,26 +369,26 @@ export default function Index() {
                                 ),
                             lastSpots && "border-primary/35 shadow-[0_0_0_1px_hsl(var(--primary)/0.2)]",
                           )}
-                          aria-label={`${c.name}, ${c.day} at ${c.time}`}
+                          aria-label={t("schedule.sessionArticle", { name: classNameTr, day: dayTr, time: c.time })}
                         >
                           <div className="sm:w-28 shrink-0 flex sm:flex-col gap-2 sm:gap-0 sm:items-start items-center">
-                            <span className="font-display font-semibold text-sm text-primary">{c.day}</span>
+                            <span className="font-display font-semibold text-sm text-primary">{dayTr}</span>
                             <span className="text-muted-foreground text-sm tabular-nums">{c.time}</span>
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-display font-semibold text-base" id={`session-title-${slugify(c.name, c.day, c.time)}`}>
-                              {c.name}
+                            <h4 className="font-display font-semibold text-base" id={`session-title-${c.id}`}>
+                              {classNameTr}
                             </h4>
                           </div>
 
                           <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant="outline" className={cn(focusColor(c.focus), "text-xs font-medium")}>
-                              {c.focus}
+                              {t(FOCUS_MSG[c.focus])}
                             </Badge>
                             <Badge variant="outline" className="text-xs font-medium border-border text-muted-foreground">
                               <MapPin className="h-3 w-3 mr-1" aria-hidden />
-                              {c.location}
+                              {locLabel(c.location)}
                             </Badge>
                             <Badge variant="outline" className="text-xs font-medium border-border text-muted-foreground">
                               <Clock className="h-3 w-3 mr-1" aria-hidden />
@@ -351,7 +396,7 @@ export default function Index() {
                             </Badge>
                             {lastSpots && (
                               <Badge variant="outline" className="text-xs font-medium border-primary/40 text-primary bg-primary/10">
-                                Last spots
+                                {t("schedule.lastSpots")}
                               </Badge>
                             )}
                           </div>
@@ -359,13 +404,13 @@ export default function Index() {
                           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
                             <span className="text-xs text-muted-foreground tabular-nums min-w-[6rem] sm:text-right">
                               {isFull ? (
-                                <span className="font-medium text-foreground/80">Full</span>
+                                <span className="font-medium text-foreground/80">{t("schedule.full")}</span>
                               ) : lastSpots ? (
                                 <span className="text-primary font-semibold">
-                                  {c.spots === 1 ? "1 spot left" : `${c.spots} spots left`}
+                                  {c.spots === 1 ? t("schedule.spotLeft") : t("schedule.spotsLeft", { n: c.spots })}
                                 </span>
                               ) : (
-                                <span>{c.spots} spots</span>
+                                <span>{t("schedule.spots", { n: c.spots })}</span>
                               )}
                             </span>
                             <Button
@@ -374,13 +419,13 @@ export default function Index() {
                               className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-xs px-4 disabled:opacity-50"
                               aria-label={
                                 isFull
-                                  ? `${c.name} on ${c.day} at ${c.time} is full`
-                                  : `Book ${c.name} on ${c.day} at ${c.time}`
+                                  ? t("schedule.ariaFull", { name: classNameTr, day: dayTr, time: c.time })
+                                  : t("schedule.ariaBook", { name: classNameTr, day: dayTr, time: c.time })
                               }
-                              aria-describedby={`session-title-${slugify(c.name, c.day, c.time)}`}
+                              aria-describedby={`session-title-${c.id}`}
                               onClick={() => openBooking(c)}
                             >
-                              {isFull ? "Full" : "Book"}
+                              {isFull ? t("schedule.full") : t("schedule.book")}
                             </Button>
                           </div>
                         </article>
@@ -399,28 +444,23 @@ export default function Index() {
         <div className="container">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
-              <img src={coachImg} alt="Coach Alex Moreno" width={800} height={1024} loading="lazy" className="rounded-lg w-full max-w-sm mx-auto md:mx-0 aspect-square object-cover" />
+              <img src={coachImg} alt={t("coach.imageAlt")} width={800} height={1024} loading="lazy" className="rounded-lg w-full max-w-sm mx-auto md:mx-0 aspect-square object-cover" />
             </div>
             <div>
-              <SectionEyebrow>Your coach</SectionEyebrow>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-6">Alex Moreno</h2>
+              <SectionEyebrow>{t("coach.eyebrow")}</SectionEyebrow>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold mb-6">{t("coach.name")}</h2>
               <div className="mb-8 rounded-lg border border-border/80 bg-muted/20 px-4 py-3 text-sm">
                 <p className="font-display font-semibold text-foreground/95 text-xs uppercase tracking-wide text-primary/90 mb-1.5">
-                  Credentials &amp; languages
+                  {t("coach.credTitle")}
                 </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  NSCA-CSCS · First aid certified · Sessions in <span className="text-foreground/85">English</span> and{" "}
-                  <span className="text-foreground/85">Spanish</span>
-                </p>
+                <p className="text-muted-foreground leading-relaxed">{t("coach.credBody")}</p>
               </div>
-              <p className="text-muted-foreground mb-8 leading-relaxed">
-                Strength &amp; Conditioning Coach based in Barcelona. Training professionals and expats who want structured, efficient sessions — not random workouts.
-              </p>
+              <p className="text-muted-foreground mb-8 leading-relaxed">{t("coach.bio")}</p>
               <ul className="space-y-4">
                 {[
-                  { icon: Dumbbell, text: "10+ years coaching experience across elite and recreational athletes" },
-                  { icon: Users, text: "Structured programming tailored to your capacity and schedule" },
-                  { icon: Clock, text: "Consistency over intensity — sustainable progress, every week" },
+                  { icon: Dumbbell, text: t("coach.bullet1") },
+                  { icon: Users, text: t("coach.bullet2") },
+                  { icon: Clock, text: t("coach.bullet3") },
                 ].map((item) => (
                   <li key={item.text} className="flex gap-3 items-start">
                     <item.icon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
@@ -433,8 +473,8 @@ export default function Index() {
 
           {/* Studio + Outdoor images */}
           <div className="grid sm:grid-cols-2 gap-4 mt-16">
-            <img src={studioImg} alt="Training studio interior" width={1280} height={854} loading="lazy" className="rounded-lg w-full h-64 sm:h-80 object-cover" />
-            <img src={outdoorImg} alt="Outdoor training in Barcelona" width={1280} height={854} loading="lazy" className="rounded-lg w-full h-64 sm:h-80 object-cover" />
+            <img src={studioImg} alt={t("coach.studioAlt")} width={1280} height={854} loading="lazy" className="rounded-lg w-full h-64 sm:h-80 object-cover" />
+            <img src={outdoorImg} alt={t("coach.outdoorAlt")} width={1280} height={854} loading="lazy" className="rounded-lg w-full h-64 sm:h-80 object-cover" />
           </div>
         </div>
       </section>
@@ -442,27 +482,30 @@ export default function Index() {
       {/* ───── SOCIAL PROOF ───── */}
       <section id="testimonials" className="py-20 sm:py-28 border-t border-border bg-muted/25 scroll-mt-20 sm:scroll-mt-24">
         <div className="container">
-          <SectionEyebrow>Social proof</SectionEyebrow>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10">What Clients Say</h2>
+          <SectionEyebrow>{t("testimonials.eyebrow")}</SectionEyebrow>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10">{t("testimonials.title")}</h2>
 
           <div className="-mx-4 px-4 flex sm:grid sm:grid-cols-2 gap-4 sm:gap-6 mb-12 overflow-x-auto sm:overflow-visible snap-x snap-mandatory sm:snap-none pb-2 sm:pb-0 scroll-smooth [scrollbar-width:thin]">
-            {TESTIMONIALS.map((t) => (
-              <div
-                key={t.name}
-                className="bg-card border border-border rounded-lg p-6 relative snap-center shrink-0 w-[min(22rem,calc(100vw-3rem))] sm:w-auto sm:shrink"
-              >
-                <Quote className="h-5 w-5 text-primary/40 absolute top-5 right-5" aria-hidden />
-                <p className="text-foreground/90 mb-4 leading-relaxed">{t.text}</p>
-                <p className="text-sm text-muted-foreground">
-                  {t.name}, {t.age} — <span className="text-foreground/70">{t.role}</span>
-                </p>
-              </div>
-            ))}
+            {TESTIMONIAL_IDS.map((tid) => {
+              const person = TESTIMONIAL_PEOPLE[tid];
+              return (
+                <div
+                  key={tid}
+                  className="bg-card border border-border rounded-lg p-6 relative snap-center shrink-0 w-[min(22rem,calc(100vw-3rem))] sm:w-auto sm:shrink"
+                >
+                  <Quote className="h-5 w-5 text-primary/40 absolute top-5 right-5" aria-hidden />
+                  <p className="text-foreground/90 mb-4 leading-relaxed">{t(`testimonials.${tid}.text`)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {person.name}, {person.age} — <span className="text-foreground/70">{t(`testimonials.${tid}.role`)}</span>
+                  </p>
+                </div>
+              );
+            })}
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            <img src={communityOutdoorImg} alt="Community outdoor training" width={1280} height={854} loading="lazy" className="rounded-lg w-full h-56 sm:h-72 object-cover" />
-            <img src={communityStudioImg} alt="Community studio training" width={1280} height={854} loading="lazy" className="rounded-lg w-full h-56 sm:h-72 object-cover" />
+            <img src={communityOutdoorImg} alt={t("testimonials.communityOutdoorAlt")} width={1280} height={854} loading="lazy" className="rounded-lg w-full h-56 sm:h-72 object-cover" />
+            <img src={communityStudioImg} alt={t("testimonials.communityStudioAlt")} width={1280} height={854} loading="lazy" className="rounded-lg w-full h-56 sm:h-72 object-cover" />
           </div>
         </div>
       </section>
@@ -470,54 +513,52 @@ export default function Index() {
       {/* ───── LOGISTICS ───── */}
       <section id="practical-info" className="py-20 sm:py-28 border-t border-border scroll-mt-20 sm:scroll-mt-24">
         <div className="container max-w-4xl">
-          <SectionEyebrow>Logistics</SectionEyebrow>
-          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10">Practical Info</h2>
+          <SectionEyebrow>{t("practical.eyebrow")}</SectionEyebrow>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10">{t("practical.title")}</h2>
 
           <div className="rounded-xl border border-border/70 bg-card/30 p-5 sm:p-6 mb-10">
-            <h3 className="font-display font-semibold text-sm text-primary mb-3">Maps &amp; directions</h3>
-            <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
-              Exact studio address is shared after booking. Use these pins to get a feel for areas — swap coordinates for your real doorstep when you publish.
-            </p>
+            <h3 className="font-display font-semibold text-sm text-primary mb-3">{t("practical.mapsTitle")}</h3>
+            <p className="text-sm text-muted-foreground mb-4 max-w-2xl">{t("practical.mapsIntro")}</p>
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground/90">{DIRECTIONS.studio.label}</p>
+                <p className="text-sm font-medium text-foreground/90">{t("practical.studioPin")}</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
                   <a
-                    href={DIRECTIONS.studio.google}
+                    href={MAP_URLS.studio.google}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-primary hover:text-primary/90 underline-offset-4 hover:underline"
                   >
-                    Google Maps <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                    {t("practical.googleMaps")} <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
                   </a>
                   <a
-                    href={DIRECTIONS.studio.apple}
+                    href={MAP_URLS.studio.apple}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-primary hover:text-primary/90 underline-offset-4 hover:underline"
                   >
-                    Apple Maps <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                    {t("practical.appleMaps")} <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
                   </a>
                 </div>
               </div>
               <div className="space-y-2">
-                <p className="text-sm font-medium text-foreground/90">{DIRECTIONS.outdoorSample.label}</p>
+                <p className="text-sm font-medium text-foreground/90">{t("practical.outdoorPin")}</p>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
                   <a
-                    href={DIRECTIONS.outdoorSample.google}
+                    href={MAP_URLS.outdoorSample.google}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-primary hover:text-primary/90 underline-offset-4 hover:underline"
                   >
-                    Google Maps <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                    {t("practical.googleMaps")} <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
                   </a>
                   <a
-                    href={DIRECTIONS.outdoorSample.apple}
+                    href={MAP_URLS.outdoorSample.apple}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-primary hover:text-primary/90 underline-offset-4 hover:underline"
                   >
-                    Apple Maps <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                    {t("practical.appleMaps")} <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
                   </a>
                 </div>
               </div>
@@ -527,31 +568,31 @@ export default function Index() {
           <div className="grid sm:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div>
-                <h3 className="font-display font-semibold text-sm text-primary mb-1">Base Location</h3>
-                <p className="text-foreground/90 text-sm">Private studio — Eixample, Barcelona</p>
+                <h3 className="font-display font-semibold text-sm text-primary mb-1">{t("practical.baseLocation")}</h3>
+                <p className="text-foreground/90 text-sm">{t("practical.baseLocationText")}</p>
               </div>
               <div>
-                <h3 className="font-display font-semibold text-sm text-primary mb-1">Outdoor Locations</h3>
-                <p className="text-foreground/90 text-sm">Parc de la Ciutadella, Barceloneta Beach, Montjuïc</p>
+                <h3 className="font-display font-semibold text-sm text-primary mb-1">{t("practical.outdoorLocations")}</h3>
+                <p className="text-foreground/90 text-sm">{t("practical.outdoorLocationsText")}</p>
               </div>
               <div>
-                <h3 className="font-display font-semibold text-sm text-primary mb-1">Session Length</h3>
-                <p className="text-foreground/90 text-sm">45–60 minutes, warm-up included</p>
+                <h3 className="font-display font-semibold text-sm text-primary mb-1">{t("practical.sessionLength")}</h3>
+                <p className="text-foreground/90 text-sm">{t("practical.sessionLengthText")}</p>
               </div>
             </div>
 
             <div className="space-y-6">
               <div>
-                <h3 className="font-display font-semibold text-sm text-primary mb-1">What to Bring</h3>
-                <p className="text-foreground/90 text-sm">Training shoes, water, towel. All equipment provided.</p>
+                <h3 className="font-display font-semibold text-sm text-primary mb-1">{t("practical.whatToBring")}</h3>
+                <p className="text-foreground/90 text-sm">{t("practical.whatToBringText")}</p>
               </div>
               <div>
-                <h3 className="font-display font-semibold text-sm text-primary mb-1">For You If</h3>
-                <p className="text-foreground/90 text-sm">You want structured, progressive training and you're ready to commit to a schedule.</p>
+                <h3 className="font-display font-semibold text-sm text-primary mb-1">{t("practical.forYouIf")}</h3>
+                <p className="text-foreground/90 text-sm">{t("practical.forYouIfText")}</p>
               </div>
               <div>
-                <h3 className="font-display font-semibold text-sm text-primary mb-1">Not For You If</h3>
-                <p className="text-foreground/90 text-sm">You're looking for casual drop-ins or entertainment-style fitness.</p>
+                <h3 className="font-display font-semibold text-sm text-primary mb-1">{t("practical.notForYouIf")}</h3>
+                <p className="text-foreground/90 text-sm">{t("practical.notForYouIfText")}</p>
               </div>
             </div>
           </div>
@@ -561,13 +602,11 @@ export default function Index() {
       {/* ───── FINAL CTA ───── */}
       <section className="py-24 sm:py-32 border-t border-border">
         <div className="container text-center">
-          <SectionEyebrow>Next step</SectionEyebrow>
-          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">Ready to train?</h2>
-          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-            Pick a session, choose your time, show up. That's it.
-          </p>
+          <SectionEyebrow>{t("cta.eyebrow")}</SectionEyebrow>
+          <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">{t("cta.title")}</h2>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">{t("cta.body")}</p>
           <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-display text-base px-10 h-12" onClick={() => openBooking()}>
-            Book Your Session
+            {t("cta.book")}
             <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </div>
@@ -579,12 +618,12 @@ export default function Index() {
       <footer id="contact" className="border-t border-border py-10 scroll-mt-20 sm:scroll-mt-24">
         <div className="container flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="text-center sm:text-left">
-            <p className="text-xs text-muted-foreground">© 2026 Alex Moreno — Strength &amp; Conditioning, Barcelona</p>
+            <p className="text-xs text-muted-foreground">{t("footer.copyright")}</p>
             <p className="mt-2 text-xs text-muted-foreground max-w-sm">
-              <span className="text-foreground/70">Availability &amp; billing questions?</span> Use the booking flow or email — see below.
+              <span className="text-foreground/70">{t("footer.availabilityLead")}</span> {t("footer.availabilityRest")}
             </p>
           </div>
-          <nav className="flex flex-col items-center sm:items-end gap-3" aria-label="Footer links">
+          <nav className="flex flex-col items-center sm:items-end gap-3" aria-label={t("footer.linksLabel")}>
             <div className="flex flex-wrap justify-center sm:justify-end gap-x-5 gap-y-2 text-xs">
               <a
                 href="mailto:alex@barcelona-sessions.com"
@@ -598,18 +637,16 @@ export default function Index() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors rounded-sm"
               >
-                Instagram <ExternalLink className="h-3 w-3 opacity-70" aria-hidden />
+                {t("footer.instagram")} <ExternalLink className="h-3 w-3 opacity-70" aria-hidden />
               </a>
               <a href="#practical-info" className="text-muted-foreground hover:text-primary transition-colors rounded-sm">
-                Practical info
+                {t("footer.practicalInfo")}
               </a>
               <a href="#schedule" className="text-muted-foreground hover:text-primary transition-colors rounded-sm">
-                Schedule
+                {t("footer.schedule")}
               </a>
             </div>
-            <p className="text-[11px] text-muted-foreground text-center sm:text-right max-w-xs">
-              Privacy / legal: sample placeholder — add your policy and cookie text before launch.
-            </p>
+            <p className="text-[11px] text-muted-foreground text-center sm:text-right max-w-xs">{t("footer.privacy")}</p>
           </nav>
         </div>
       </footer>
@@ -621,7 +658,7 @@ export default function Index() {
           className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 font-display shadow-lg shadow-black/30"
           onClick={() => openBooking()}
         >
-          Book Your Session
+          {t("hero.bookSession")}
           <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       </div>
@@ -629,8 +666,4 @@ export default function Index() {
       <BookingModal open={bookingOpen} onOpenChange={handleBookingOpenChange} selectedSession={selectedSession} />
     </div>
   );
-}
-
-function slugify(name: string, day: string, time: string) {
-  return `${name}-${day}-${time}`.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9_-]/g, "");
 }

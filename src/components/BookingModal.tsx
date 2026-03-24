@@ -1,7 +1,9 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { addDays, format, isBefore, startOfDay } from "date-fns";
+import { enUS, es as esLocale } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nContext";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -47,6 +49,9 @@ function isValidOptionalEmail(value: string): boolean {
 }
 
 export function BookingModal({ open, onOpenChange, selectedSession }: BookingModalProps) {
+  const { locale, t } = useI18n();
+  const dfLocale = locale === "es" ? esLocale : enUS;
+
   const formId = useId();
   const dateTriggerId = `${formId}-date-trigger`;
   const nameId = `${formId}-name`;
@@ -86,19 +91,19 @@ export function BookingModal({ open, onOpenChange, selectedSession }: BookingMod
 
   const handleConfirm = () => {
     if (!date || !time || !name.trim() || !phone.trim()) {
-      toast({ title: "Please fill in all required fields", variant: "destructive" });
+      toast({ title: t("booking.required"), variant: "destructive" });
       return;
     }
     if (!isValidOptionalEmail(email)) {
-      toast({ title: "Please enter a valid email", variant: "destructive" });
+      toast({ title: t("booking.badEmail"), variant: "destructive" });
       return;
     }
-    const sessionTitle = selectedSession?.name ?? "Personal Training";
+    const sessionTitle = selectedSession?.name ?? t("booking.personalTraining");
     const loc = selectedSession?.location;
-    const bits = [`${sessionTitle}`, format(date, "PPP"), time];
+    const bits = [`${sessionTitle}`, format(date, "PPP", { locale: dfLocale }), time];
     if (loc) bits.push(loc);
     if (email.trim()) bits.push(email.trim());
-    toast({ title: "Session booked", description: bits.join(" · ") });
+    toast({ title: t("booking.toastTitle"), description: bits.join(" · ") });
     onOpenChange(false);
   };
 
@@ -113,36 +118,39 @@ export function BookingModal({ open, onOpenChange, selectedSession }: BookingMod
     return false;
   };
 
+  const req = t("booking.requiredMark");
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-card border-border sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-xl pr-8">
-            {selectedSession ? `Book: ${selectedSession.name}` : "Book Your Session"}
+            {selectedSession ? t("booking.titleNamed", { name: selectedSession.name }) : t("booking.titleGeneric")}
           </DialogTitle>
           {selectedSession ? (
             <DialogDescription>
-              You&apos;re booking this weekly slot: <span className="text-foreground/90">{sessionSummary}</span>. Choose the next date that falls on that day. Location:{" "}
-              <span className="text-foreground/90 font-medium">{selectedSession.location}</span>.
+              {t("booking.descSession", {
+                summary: sessionSummary ?? "",
+                location: selectedSession.location,
+              })}
             </DialogDescription>
           ) : (
-            <DialogDescription>
-              Pick a date and time, then leave your details. We&apos;ll confirm by phone or email.
-            </DialogDescription>
+            <DialogDescription>{t("booking.descGeneric")}</DialogDescription>
           )}
         </DialogHeader>
 
         <div className="space-y-4 pt-2">
           {sessionSummary && (
             <p className="text-xs rounded-md border border-border bg-muted/30 px-3 py-2 text-muted-foreground" aria-hidden>
-              <span className="font-medium text-foreground/80">Session</span> · {sessionSummary}
+              <span className="font-medium text-foreground/80">{t("booking.sessionSummaryLabel")}</span> · {sessionSummary}
             </p>
           )}
 
           {/* Date */}
           <div>
             <label htmlFor={dateTriggerId} className="text-sm text-muted-foreground mb-1.5 block">
-              Date<span className="text-destructive">*</span>
+              {t("booking.date")}
+              <span className="text-destructive">{req}</span>
             </label>
             <Popover>
               <PopoverTrigger asChild>
@@ -153,7 +161,7 @@ export function BookingModal({ open, onOpenChange, selectedSession }: BookingMod
                   className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 shrink-0" aria-hidden />
-                  {date ? format(date, "PPP") : "Select a date"}
+                  {date ? format(date, "PPP", { locale: dfLocale }) : t("booking.selectDate")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -163,6 +171,7 @@ export function BookingModal({ open, onOpenChange, selectedSession }: BookingMod
                   onSelect={setDate}
                   disabled={calendarDisabled}
                   initialFocus
+                  locale={dfLocale}
                   className="p-3 pointer-events-auto"
                 />
               </PopoverContent>
@@ -172,47 +181,50 @@ export function BookingModal({ open, onOpenChange, selectedSession }: BookingMod
           {/* Time */}
           <div role="group" aria-labelledby={timeLegendId}>
             <p id={timeLegendId} className="text-sm text-muted-foreground mb-1.5">
-              Time<span className="text-destructive">*</span>
+              {t("booking.time")}
+              <span className="text-destructive">{req}</span>
             </p>
             <div className="grid grid-cols-4 gap-2">
-              {timeOptions.map((t) => (
+              {timeOptions.map((slot) => (
                 <Button
-                  key={t}
+                  key={slot}
                   type="button"
-                  variant={time === t ? "default" : "outline"}
+                  variant={time === slot ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setTime(t)}
-                  className={cn("text-xs tabular-nums", time === t && "bg-primary text-primary-foreground")}
-                  aria-pressed={time === t}
+                  onClick={() => setTime(slot)}
+                  className={cn("text-xs tabular-nums", time === slot && "bg-primary text-primary-foreground")}
+                  aria-pressed={time === slot}
                 >
-                  {t}
+                  {slot}
                 </Button>
               ))}
             </div>
             {selectedSession && (
-              <p className="text-xs text-muted-foreground mt-2">Time is fixed to this class slot.</p>
+              <p className="text-xs text-muted-foreground mt-2">{t("schedule.fixedTimeHint")}</p>
             )}
           </div>
 
           {/* Name */}
           <div>
             <label htmlFor={nameId} className="text-sm text-muted-foreground mb-1.5 block">
-              Name<span className="text-destructive">*</span>
+              {t("booking.name")}
+              <span className="text-destructive">{req}</span>
             </label>
-            <Input id={nameId} name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" autoComplete="name" />
+            <Input id={nameId} name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("booking.namePh")} autoComplete="name" />
           </div>
 
           {/* Email */}
           <div>
             <label htmlFor={emailId} className="text-sm text-muted-foreground mb-1.5 block">
-              Email <span className="text-foreground/50 font-normal">(optional)</span>
+              {t("booking.email")}{" "}
+              <span className="text-foreground/50 font-normal">{t("booking.emailOptional")}</span>
             </label>
             <Input
               id={emailId}
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={t("booking.emailPh")}
               type="email"
               inputMode="email"
               autoComplete="email"
@@ -222,21 +234,22 @@ export function BookingModal({ open, onOpenChange, selectedSession }: BookingMod
           {/* Phone */}
           <div>
             <label htmlFor={phoneId} className="text-sm text-muted-foreground mb-1.5 block">
-              Phone<span className="text-destructive">*</span>
+              {t("booking.phone")}
+              <span className="text-destructive">{req}</span>
             </label>
             <Input
               id={phoneId}
               name="phone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+34 600 000 000"
+              placeholder={t("booking.phonePh")}
               type="tel"
               autoComplete="tel"
             />
           </div>
 
           <Button type="button" onClick={handleConfirm} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-display">
-            Confirm Booking
+            {t("booking.confirm")}
           </Button>
         </div>
       </DialogContent>

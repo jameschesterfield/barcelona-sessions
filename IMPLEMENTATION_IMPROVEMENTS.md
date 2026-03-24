@@ -91,9 +91,9 @@ Goal: baseline compliance and comfort for reduced motion.
 
 Goal: shareable, discoverable single-page experience.
 
-- [ ] Set **document title** and **meta description** in `index.html` (or head management)
-- [ ] Add **Open Graph** / Twitter cards (title, description, image path)
-- [ ] Optional: **canonical** and `lang` attribute if you add locales later
+- [x] Set **document title** and **meta description** in `index.html` (or head management)
+- [x] Add **Open Graph** / Twitter cards (title, description, image path)
+- [x] Optional: **canonical** and `lang` attribute if you add locales later
 
 ---
 
@@ -101,9 +101,9 @@ Goal: shareable, discoverable single-page experience.
 
 Goal: consistency with the main brand shell.
 
-- [ ] Restyle **`NotFound`** to match dark theme, typography (`font-display`), and spacing
-- [ ] Replace plain `<a href="/">` with **router `Link`** (or equivalent) for client-side navigation
-- [ ] Remove or gate **`console.error`** in production if it is only for dev debugging
+- [x] Restyle **`NotFound`** to match dark theme, typography (`font-display`), and spacing
+- [x] Replace plain `<a href="/">` with **router `Link`** (or equivalent) for client-side navigation
+- [x] Remove or gate **`console.error`** in production if it is only for dev debugging
 
 ---
 
@@ -111,10 +111,10 @@ Goal: consistency with the main brand shell.
 
 Goal: EN / ES (or EN / ES / CA) without backend.
 
-- [ ] Decide **languages** and **default**
-- [ ] Extract user-visible strings into a **dictionary** or i18n module
-- [ ] Add a **language toggle** in header or footer
-- [ ] Set **`html lang`** (and optionally `dir`) when locale changes
+- [x] Decide **languages** and **default**
+- [x] Extract user-visible strings into a **dictionary** or i18n module
+- [x] Add a **language toggle** in header or footer
+- [x] Set **`html lang`** (and optionally `dir`) when locale changes
 
 ---
 
@@ -129,10 +129,10 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 | Trust & practical info      | 3     | 3    |
 | Performance                 | 4     | 4    |
 | Accessibility & motion      | 5     | 5    |
-| SEO & meta                  | 3     | 0    |
-| 404 / global                | 3     | 0    |
-| i18n (optional)             | 4     | 0    |
-| **Total checklist items**   | **44** | **34** |
+| SEO & meta                  | 3     | 3    |
+| 404 / global                | 3     | 3    |
+| i18n (optional)             | 4     | 4    |
+| **Total checklist items**   | **44** | **44** |
 
 Update the **Done** column (or mark checkboxes) as you complete work. Optional i18n can stay unchecked until you commit to languages.
 

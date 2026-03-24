@@ -68,10 +68,10 @@ Goal: reduce friction for “where is this?” without building backend.
 
 Goal: better LCP and fewer layout surprises.
 
-- [ ] **Hero image**: responsive sources (`srcset` / `<picture>`) and appropriate sizes
-- [ ] Consider **`fetchpriority="high"`** (or equivalent) on LCP image where supported
-- [ ] **Fonts**: subset or preload strategy for **Space Grotesk** / Inter; audit FOUT/CLS
-- [ ] Optional: **blur placeholder** or dominant-color for hero (if you adopt a helper or build step)
+- [x] **Hero image**: responsive sources (`srcset` / `<picture>`) and appropriate sizes
+- [x] Consider **`fetchpriority="high"`** (or equivalent) on LCP image where supported
+- [x] **Fonts**: subset or preload strategy for **Space Grotesk** / Inter; audit FOUT/CLS
+- [x] Optional: **blur placeholder** or dominant-color for hero (if you adopt a helper or build step)
 
 ---
 
@@ -79,11 +79,11 @@ Goal: better LCP and fewer layout surprises.
 
 Goal: baseline compliance and comfort for reduced motion.
 
-- [ ] Add **“Skip to main content”** link at top of layout (targets main landmark)
-- [ ] Ensure **main landmark** and logical **heading order** across the page
-- [ ] **Contrast review** for `muted-foreground` and small text (badges, footer, labels)
-- [ ] Honor **`prefers-reduced-motion`** for any scroll/hover animations you add
-- [ ] Revisit **focus styles** so custom components match visible focus rings
+- [x] Add **“Skip to main content”** link at top of layout (targets main landmark)
+- [x] Ensure **main landmark** and logical **heading order** across the page
+- [x] **Contrast review** for `muted-foreground` and small text (badges, footer, labels)
+- [x] Honor **`prefers-reduced-motion`** for any scroll/hover animations you add
+- [x] Revisit **focus styles** so custom components match visible focus rings
 
 ---
 
@@ -127,12 +127,12 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 | Booking modal               | 6     | 6    |
 | Visual rhythm               | 5     | 5    |
 | Trust & practical info      | 3     | 3    |
-| Performance                 | 4     | 0    |
-| Accessibility & motion      | 5     | 0    |
+| Performance                 | 4     | 4    |
+| Accessibility & motion      | 5     | 5    |
 | SEO & meta                  | 3     | 0    |
 | 404 / global                | 3     | 0    |
 | i18n (optional)             | 4     | 0    |
-| **Total checklist items**   | **44** | **25** |
+| **Total checklist items**   | **44** | **34** |
 
 Update the **Done** column (or mark checkboxes) as you complete work. Optional i18n can stay unchecked until you commit to languages.
 

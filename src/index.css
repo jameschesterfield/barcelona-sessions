@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap&subset=latin,latin-ext");
 
 @tailwind base;
 @tailwind components;
@@ -22,7 +22,8 @@
     --secondary-foreground: 0 0% 93%;
 
     --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 55%;
+    /* ~5.8:1 on #0a0a0a for small UI copy (was 55%, below ~4.6:1) */
+    --muted-foreground: 0 0% 63%;
 
     --accent: 24 95% 53%;
     --accent-foreground: 0 0% 100%;
@@ -60,8 +61,42 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Space Grotesk', sans-serif;
   }
+
+  a:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background rounded-sm;
+  }
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+@layer components {
+  .skip-to-main {
+    @apply sr-only;
+  }
+
+  .skip-to-main:focus {
+    position: fixed;
+    left: 1rem;
+    top: 1rem;
+    z-index: 100;
+    display: block;
+    height: auto;
+    width: auto;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: nowrap;
+    @apply rounded-md bg-primary px-4 py-2.5 font-display text-sm font-semibold text-primary-foreground shadow-lg outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
 }

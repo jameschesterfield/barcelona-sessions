@@ -5,7 +5,9 @@ import { BookingModal, type BookableSession } from "@/components/BookingModal";
 import { cn } from "@/lib/utils";
 import { MapPin, Clock, Dumbbell, Users, ChevronRight, Quote, ExternalLink } from "lucide-react";
 
-import heroImg from "@/assets/hero-training.jpg";
+import heroImg640 from "@/assets/hero-training-w640.jpg";
+import heroImg1280 from "@/assets/hero-training-w1280.jpg";
+import heroImg1920 from "@/assets/hero-training-w1920.jpg";
 import coachImg from "@/assets/coach-portrait.jpg";
 import studioImg from "@/assets/studio-interior.jpg";
 import outdoorImg from "@/assets/outdoor-training.jpg";
@@ -116,19 +118,29 @@ export default function Index() {
     return map;
   }, [filteredClasses]);
 
+  const heroSrcSet = `${heroImg640} 640w, ${heroImg1280} 1280w, ${heroImg1920} 1920w`;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ───── STICKY NAV ───── */}
       <header className="fixed top-0 left-0 right-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/75">
         <div className="container h-14 flex items-center justify-between">
-          <a href="#top" className="font-display text-sm sm:text-base font-semibold tracking-tight">
+          <a href="#top" className="font-display text-sm sm:text-base font-semibold tracking-tight rounded-sm">
             Alex Moreno
           </a>
-          <nav className="hidden sm:flex items-center gap-5 text-sm">
-            <a href="#schedule" className="text-muted-foreground hover:text-foreground transition-colors">Schedule</a>
-            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
-            <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
-            <a href="#practical-info" className="text-muted-foreground hover:text-foreground transition-colors">Info</a>
+          <nav className="hidden sm:flex items-center gap-5 text-sm" aria-label="Primary">
+            <a href="#schedule" className="text-muted-foreground hover:text-foreground transition-colors rounded-sm">
+              Schedule
+            </a>
+            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors rounded-sm">
+              About
+            </a>
+            <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors rounded-sm">
+              Testimonials
+            </a>
+            <a href="#practical-info" className="text-muted-foreground hover:text-foreground transition-colors rounded-sm">
+              Info
+            </a>
           </nav>
           <Button size="sm" className="h-9 px-4 font-display bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => openBooking()}>
             Book
@@ -136,14 +148,27 @@ export default function Index() {
         </div>
       </header>
 
+      <main id="main-content" tabIndex={-1} className="outline-none">
       {/* ───── HERO ───── */}
-      <section id="top" className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
+      <section id="top" className="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-muted">
         <img
-          src={heroImg}
+          src={heroImg640}
+          alt=""
+          width={640}
+          height={360}
+          className="absolute inset-0 h-full w-full object-cover object-[center_22%] sm:object-[center_30%] md:object-center blur-2xl scale-110 opacity-60 pointer-events-none select-none motion-reduce:blur-none motion-reduce:opacity-30"
+          aria-hidden
+        />
+        <img
+          src={heroImg1920}
+          srcSet={heroSrcSet}
+          sizes="100vw"
           alt="Strength training session"
           width={1920}
           height={1080}
-          className="absolute inset-0 w-full h-full object-cover opacity-40 object-[center_22%] sm:object-[center_30%] md:object-center"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-40 object-[center_22%] sm:object-[center_30%] md:object-center"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
         <div className="relative z-10 container max-w-3xl text-center px-6 py-32">
@@ -161,10 +186,16 @@ export default function Index() {
               <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
             <div className="flex items-center gap-4">
-              <a href="#schedule" className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4">
+              <a
+                href="#schedule"
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4 rounded-sm"
+              >
                 View Schedule
               </a>
-              <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4">
+              <a
+                href="#about"
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4 rounded-sm"
+              >
                 About Alex
               </a>
             </div>
@@ -542,36 +573,41 @@ export default function Index() {
         </div>
       </section>
 
+      </main>
+
       {/* ───── FOOTER ───── */}
       <footer id="contact" className="border-t border-border py-10 scroll-mt-20 sm:scroll-mt-24">
         <div className="container flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="text-center sm:text-left">
             <p className="text-xs text-muted-foreground">© 2026 Alex Moreno — Strength &amp; Conditioning, Barcelona</p>
-            <p className="mt-2 text-xs text-muted-foreground/80 max-w-sm">
+            <p className="mt-2 text-xs text-muted-foreground max-w-sm">
               <span className="text-foreground/70">Availability &amp; billing questions?</span> Use the booking flow or email — see below.
             </p>
           </div>
           <nav className="flex flex-col items-center sm:items-end gap-3" aria-label="Footer links">
             <div className="flex flex-wrap justify-center sm:justify-end gap-x-5 gap-y-2 text-xs">
-              <a href="mailto:alex@barcelona-sessions.com" className="text-muted-foreground hover:text-primary transition-colors">
+              <a
+                href="mailto:alex@barcelona-sessions.com"
+                className="text-muted-foreground hover:text-primary transition-colors rounded-sm"
+              >
                 alex@barcelona-sessions.com
               </a>
               <a
                 href="https://www.instagram.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors rounded-sm"
               >
                 Instagram <ExternalLink className="h-3 w-3 opacity-70" aria-hidden />
               </a>
-              <a href="#practical-info" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#practical-info" className="text-muted-foreground hover:text-primary transition-colors rounded-sm">
                 Practical info
               </a>
-              <a href="#schedule" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#schedule" className="text-muted-foreground hover:text-primary transition-colors rounded-sm">
                 Schedule
               </a>
             </div>
-            <p className="text-[11px] text-muted-foreground/65 text-center sm:text-right max-w-xs">
+            <p className="text-[11px] text-muted-foreground text-center sm:text-right max-w-xs">
               Privacy / legal: sample placeholder — add your policy and cookie text before launch.
             </p>
           </nav>

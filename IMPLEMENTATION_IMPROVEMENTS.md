@@ -20,12 +20,12 @@ Goal: persistent wayfinding and a clear primary action after the hero scrolls aw
 
 Goal: faster scanning, optional filtering, clearer scarcity — all with static or client-side data.
 
-- [ ] **Group sessions by day** (day subheads or visual separation) *or* implement a **day strip** that filters rows
-- [ ] Add **filter chips** (e.g. Studio / Outdoor, optional Focus: Strength / Conditioning / Mobility)
-- [ ] Refine **low-availability UX** (e.g. “Last spots” copy, optional subtle visual for `spots ≤ 2`)
-- [ ] Handle edge case: **`spots === 0`** (disabled Book, “Full” or waitlist copy) if you add that data later
-- [ ] **Keyboard / focus**: logical tab order; consider row-level focus or prominent Book per row
-- [ ] Add **`aria`** where helpful (region labels, live region for filter results if dynamic)
+- [x] **Group sessions by day** (day subheads or visual separation) *or* implement a **day strip** that filters rows
+- [x] Add **filter chips** (e.g. Studio / Outdoor, optional Focus: Strength / Conditioning / Mobility)
+- [x] Refine **low-availability UX** (e.g. “Last spots” copy, optional subtle visual for `spots ≤ 2`)
+- [x] Handle edge case: **`spots === 0`** (disabled Book, “Full” or waitlist copy) if you add that data later
+- [x] **Keyboard / focus**: logical tab order; consider row-level focus or prominent Book per row
+- [x] Add **`aria`** where helpful (region labels, live region for filter results if dynamic)
 
 ---
 
@@ -123,7 +123,7 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 | Area                         | Items | Done |
 |-----------------------------|-------|------|
 | Navigation & scroll         | 5     | 5    |
-| Schedule                    | 6     | 0    |
+| Schedule                    | 6     | 6    |
 | Booking modal               | 6     | 0    |
 | Visual rhythm               | 5     | 0    |
 | Trust & practical info      | 3     | 0    |
@@ -132,7 +132,7 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 | SEO & meta                  | 3     | 0    |
 | 404 / global                | 3     | 0    |
 | i18n (optional)             | 4     | 0    |
-| **Total checklist items**   | **44** | **5** |
+| **Total checklist items**   | **44** | **11** |
 
 Update the **Done** column (or mark checkboxes) as you complete work. Optional i18n can stay unchecked until you commit to languages.
 

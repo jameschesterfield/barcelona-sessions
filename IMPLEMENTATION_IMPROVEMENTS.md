@@ -8,11 +8,11 @@ Track progress with the checkboxes below. Scope is **frontend only** (no backend
 
 Goal: persistent wayfinding and a clear primary action after the hero scrolls away.
 
-- [ ] Add a **minimal sticky header** (brand/name, anchor links, primary Book CTA)
-- [ ] Wire anchor links to existing sections (e.g. Schedule, About/coach, Testimonials, Practical info)
-- [ ] Add **floating “Book” control on small viewports** (optional: show only after hero is out of view)
-- [ ] Add **secondary hero link** aligned with anchors (e.g. “About Alex”) if it reduces scroll-only discovery
-- [ ] Verify **scroll offset** so fixed header does not hide section titles when jumping to `#ids`
+- [x] Add a **minimal sticky header** (brand/name, anchor links, primary Book CTA)
+- [x] Wire anchor links to existing sections (e.g. Schedule, About/coach, Testimonials, Practical info)
+- [x] Add **floating “Book” control on small viewports** (optional: show only after hero is out of view)
+- [x] Add **secondary hero link** aligned with anchors (e.g. “About Alex”) if it reduces scroll-only discovery
+- [x] Verify **scroll offset** so fixed header does not hide section titles when jumping to `#ids`
 
 ---
 
@@ -122,7 +122,7 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 
 | Area                         | Items | Done |
 |-----------------------------|-------|------|
-| Navigation & scroll         | 5     | 0    |
+| Navigation & scroll         | 5     | 5    |
 | Schedule                    | 6     | 0    |
 | Booking modal               | 6     | 0    |
 | Visual rhythm               | 5     | 0    |
@@ -132,7 +132,7 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 | SEO & meta                  | 3     | 0    |
 | 404 / global                | 3     | 0    |
 | i18n (optional)             | 4     | 0    |
-| **Total checklist items**   | **44** | **0** |
+| **Total checklist items**   | **44** | **5** |
 
 Update the **Done** column (or mark checkboxes) as you complete work. Optional i18n can stay unchecked until you commit to languages.
 

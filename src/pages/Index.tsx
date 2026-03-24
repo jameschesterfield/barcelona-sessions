@@ -46,8 +46,26 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* ───── STICKY NAV ───── */}
+      <header className="fixed top-0 left-0 right-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <div className="container h-14 flex items-center justify-between">
+          <a href="#top" className="font-display text-sm sm:text-base font-semibold tracking-tight">
+            Alex Moreno
+          </a>
+          <nav className="hidden sm:flex items-center gap-5 text-sm">
+            <a href="#schedule" className="text-muted-foreground hover:text-foreground transition-colors">Schedule</a>
+            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
+            <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Testimonials</a>
+            <a href="#practical-info" className="text-muted-foreground hover:text-foreground transition-colors">Info</a>
+          </nav>
+          <Button size="sm" className="h-9 px-4 font-display bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => openBooking()}>
+            Book
+          </Button>
+        </div>
+      </header>
+
       {/* ───── HERO ───── */}
-      <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
+      <section id="top" className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
         <img src={heroImg} alt="Strength training session" width={1920} height={1080} className="absolute inset-0 w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
         <div className="relative z-10 container max-w-3xl text-center px-6 py-32">
@@ -63,15 +81,20 @@ export default function Index() {
               Book Your Session
               <ChevronRight className="ml-1 h-4 w-4" />
             </Button>
-            <a href="#schedule" className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4">
-              View Schedule
-            </a>
+            <div className="flex items-center gap-4">
+              <a href="#schedule" className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4">
+                View Schedule
+              </a>
+              <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors text-sm underline underline-offset-4">
+                About Alex
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ───── SCHEDULE ───── */}
-      <section id="schedule" className="py-20 sm:py-28">
+      <section id="schedule" className="py-20 sm:py-28 scroll-mt-20 sm:scroll-mt-24">
         <div className="container">
           <h2 className="font-display text-3xl sm:text-4xl font-bold mb-2">Weekly Schedule</h2>
           <p className="text-muted-foreground mb-10">Select a session and book your spot.</p>
@@ -117,7 +140,7 @@ export default function Index() {
       </section>
 
       {/* ───── TRUST / COACH ───── */}
-      <section className="py-20 sm:py-28 border-t border-border">
+      <section id="about" className="py-20 sm:py-28 border-t border-border scroll-mt-20 sm:scroll-mt-24">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
@@ -152,7 +175,7 @@ export default function Index() {
       </section>
 
       {/* ───── SOCIAL PROOF ───── */}
-      <section className="py-20 sm:py-28 border-t border-border">
+      <section id="testimonials" className="py-20 sm:py-28 border-t border-border scroll-mt-20 sm:scroll-mt-24">
         <div className="container">
           <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10">What Clients Say</h2>
 
@@ -176,7 +199,7 @@ export default function Index() {
       </section>
 
       {/* ───── LOGISTICS ───── */}
-      <section className="py-20 sm:py-28 border-t border-border">
+      <section id="practical-info" className="py-20 sm:py-28 border-t border-border scroll-mt-20 sm:scroll-mt-24">
         <div className="container max-w-4xl">
           <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10">Practical Info</h2>
 
@@ -234,6 +257,18 @@ export default function Index() {
           <p className="text-xs text-muted-foreground">© 2026 Alex Moreno — Strength &amp; Conditioning, Barcelona</p>
         </div>
       </footer>
+
+      {/* ───── MOBILE FLOATING CTA ───── */}
+      <div className="sm:hidden fixed bottom-4 left-0 right-0 z-30 px-4">
+        <Button
+          size="lg"
+          className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 font-display shadow-lg shadow-black/30"
+          onClick={() => openBooking()}
+        >
+          Book Your Session
+          <ChevronRight className="ml-1 h-4 w-4" />
+        </Button>
+      </div>
 
       <BookingModal open={bookingOpen} onOpenChange={setBookingOpen} className={selectedClass} />
     </div>

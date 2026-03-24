@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookingModal, type BookableSession } from "@/components/BookingModal";
 import { cn } from "@/lib/utils";
-import { MapPin, Clock, Dumbbell, Users, ChevronRight, Quote } from "lucide-react";
+import { MapPin, Clock, Dumbbell, Users, ChevronRight, Quote, ExternalLink } from "lucide-react";
 
 import heroImg from "@/assets/hero-training.jpg";
 import coachImg from "@/assets/coach-portrait.jpg";
@@ -32,6 +32,20 @@ type DayFilter = "all" | (typeof DAY_ORDER)[number];
 
 type ScheduleRow = (typeof CLASSES)[number];
 
+/** Approximate pins for directions (replace with your exact studio address when ready). */
+const DIRECTIONS = {
+  studio: {
+    label: "Studio — Eixample",
+    google: "https://www.google.com/maps/search/?api=1&query=41.3944,2.1636",
+    apple: "https://maps.apple.com/?ll=41.3944,2.1636&q=Eixample%20Barcelona",
+  },
+  outdoorSample: {
+    label: "Outdoor — Parc de la Ciutadella",
+    google: "https://www.google.com/maps/search/?api=1&query=41.3888,2.1869",
+    apple: "https://maps.apple.com/?ll=41.3888,2.1869&q=Parc%20de%20la%20Ciutadella",
+  },
+} as const;
+
 const TESTIMONIALS = [
   { text: "Structured, efficient, no wasted time. Exactly what I needed.", name: "Laura", age: 31, role: "Product Manager" },
   { text: "I've trained with coaches before. Alex is the first one I've stuck with.", name: "Tom", age: 38, role: "Software Engineer" },
@@ -44,6 +58,12 @@ const focusColor = (focus: string) => {
   if (focus === "Conditioning") return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
   return "bg-violet-500/15 text-violet-400 border-violet-500/30";
 };
+
+function SectionEyebrow({ children }: { children: ReactNode }) {
+  return (
+    <p className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary/85 mb-2">{children}</p>
+  );
+}
 
 export default function Index() {
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -118,9 +138,16 @@ export default function Index() {
 
       {/* ───── HERO ───── */}
       <section id="top" className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
-        <img src={heroImg} alt="Strength training session" width={1920} height={1080} className="absolute inset-0 w-full h-full object-cover opacity-40" />
+        <img
+          src={heroImg}
+          alt="Strength training session"
+          width={1920}
+          height={1080}
+          className="absolute inset-0 w-full h-full object-cover opacity-40 object-[center_22%] sm:object-[center_30%] md:object-center"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
         <div className="relative z-10 container max-w-3xl text-center px-6 py-32">
+          <SectionEyebrow>Barcelona · Strength &amp; conditioning</SectionEyebrow>
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
             Stronger. More Consistent.<br />
             <span className="text-primary">More Efficient.</span>
@@ -152,7 +179,8 @@ export default function Index() {
         aria-labelledby="schedule-heading"
         role="region"
       >
-        <div className="container">
+        <div className="container rounded-xl border border-border/70 bg-card/25 shadow-sm shadow-black/20 px-4 py-8 sm:px-8 sm:py-10">
+          <SectionEyebrow>Training week</SectionEyebrow>
           <h2 id="schedule-heading" className="font-display text-3xl sm:text-4xl font-bold mb-2">
             Weekly Schedule
           </h2>
@@ -259,7 +287,10 @@ export default function Index() {
                             "bg-card border rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 transition-colors",
                             isFull
                               ? "border-border/80 opacity-85"
-                              : "border-border hover:border-primary/40",
+                              : cn(
+                                  "border-border hover:border-primary/40",
+                                  "transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/25 motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:shadow-none",
+                                ),
                             lastSpots && "border-primary/35 shadow-[0_0_0_1px_hsl(var(--primary)/0.2)]",
                           )}
                           aria-label={`${c.name}, ${c.day} at ${c.time}`}
@@ -340,7 +371,17 @@ export default function Index() {
               <img src={coachImg} alt="Coach Alex Moreno" width={800} height={1024} loading="lazy" className="rounded-lg w-full max-w-sm mx-auto md:mx-0 aspect-square object-cover" />
             </div>
             <div>
+              <SectionEyebrow>Your coach</SectionEyebrow>
               <h2 className="font-display text-3xl sm:text-4xl font-bold mb-6">Alex Moreno</h2>
+              <div className="mb-8 rounded-lg border border-border/80 bg-muted/20 px-4 py-3 text-sm">
+                <p className="font-display font-semibold text-foreground/95 text-xs uppercase tracking-wide text-primary/90 mb-1.5">
+                  Credentials &amp; languages
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  NSCA-CSCS · First aid certified · Sessions in <span className="text-foreground/85">English</span> and{" "}
+                  <span className="text-foreground/85">Spanish</span>
+                </p>
+              </div>
               <p className="text-muted-foreground mb-8 leading-relaxed">
                 Strength &amp; Conditioning Coach based in Barcelona. Training professionals and expats who want structured, efficient sessions — not random workouts.
               </p>
@@ -368,14 +409,18 @@ export default function Index() {
       </section>
 
       {/* ───── SOCIAL PROOF ───── */}
-      <section id="testimonials" className="py-20 sm:py-28 border-t border-border scroll-mt-20 sm:scroll-mt-24">
+      <section id="testimonials" className="py-20 sm:py-28 border-t border-border bg-muted/25 scroll-mt-20 sm:scroll-mt-24">
         <div className="container">
+          <SectionEyebrow>Social proof</SectionEyebrow>
           <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10">What Clients Say</h2>
 
-          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-12">
+          <div className="-mx-4 px-4 flex sm:grid sm:grid-cols-2 gap-4 sm:gap-6 mb-12 overflow-x-auto sm:overflow-visible snap-x snap-mandatory sm:snap-none pb-2 sm:pb-0 scroll-smooth [scrollbar-width:thin]">
             {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-card border border-border rounded-lg p-6 relative">
-                <Quote className="h-5 w-5 text-primary/40 absolute top-5 right-5" />
+              <div
+                key={t.name}
+                className="bg-card border border-border rounded-lg p-6 relative snap-center shrink-0 w-[min(22rem,calc(100vw-3rem))] sm:w-auto sm:shrink"
+              >
+                <Quote className="h-5 w-5 text-primary/40 absolute top-5 right-5" aria-hidden />
                 <p className="text-foreground/90 mb-4 leading-relaxed">{t.text}</p>
                 <p className="text-sm text-muted-foreground">
                   {t.name}, {t.age} — <span className="text-foreground/70">{t.role}</span>
@@ -394,7 +439,59 @@ export default function Index() {
       {/* ───── LOGISTICS ───── */}
       <section id="practical-info" className="py-20 sm:py-28 border-t border-border scroll-mt-20 sm:scroll-mt-24">
         <div className="container max-w-4xl">
+          <SectionEyebrow>Logistics</SectionEyebrow>
           <h2 className="font-display text-3xl sm:text-4xl font-bold mb-10">Practical Info</h2>
+
+          <div className="rounded-xl border border-border/70 bg-card/30 p-5 sm:p-6 mb-10">
+            <h3 className="font-display font-semibold text-sm text-primary mb-3">Maps &amp; directions</h3>
+            <p className="text-sm text-muted-foreground mb-4 max-w-2xl">
+              Exact studio address is shared after booking. Use these pins to get a feel for areas — swap coordinates for your real doorstep when you publish.
+            </p>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground/90">{DIRECTIONS.studio.label}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  <a
+                    href={DIRECTIONS.studio.google}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:text-primary/90 underline-offset-4 hover:underline"
+                  >
+                    Google Maps <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                  </a>
+                  <a
+                    href={DIRECTIONS.studio.apple}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:text-primary/90 underline-offset-4 hover:underline"
+                  >
+                    Apple Maps <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                  </a>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground/90">{DIRECTIONS.outdoorSample.label}</p>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                  <a
+                    href={DIRECTIONS.outdoorSample.google}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:text-primary/90 underline-offset-4 hover:underline"
+                  >
+                    Google Maps <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                  </a>
+                  <a
+                    href={DIRECTIONS.outdoorSample.apple}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:text-primary/90 underline-offset-4 hover:underline"
+                  >
+                    Apple Maps <ExternalLink className="h-3.5 w-3.5 opacity-70" aria-hidden />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="grid sm:grid-cols-2 gap-8">
             <div className="space-y-6">
@@ -433,6 +530,7 @@ export default function Index() {
       {/* ───── FINAL CTA ───── */}
       <section className="py-24 sm:py-32 border-t border-border">
         <div className="container text-center">
+          <SectionEyebrow>Next step</SectionEyebrow>
           <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mb-6">Ready to train?</h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
             Pick a session, choose your time, show up. That's it.
@@ -445,9 +543,38 @@ export default function Index() {
       </section>
 
       {/* ───── FOOTER ───── */}
-      <footer className="border-t border-border py-8">
-        <div className="container text-center">
-          <p className="text-xs text-muted-foreground">© 2026 Alex Moreno — Strength &amp; Conditioning, Barcelona</p>
+      <footer id="contact" className="border-t border-border py-10 scroll-mt-20 sm:scroll-mt-24">
+        <div className="container flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="text-center sm:text-left">
+            <p className="text-xs text-muted-foreground">© 2026 Alex Moreno — Strength &amp; Conditioning, Barcelona</p>
+            <p className="mt-2 text-xs text-muted-foreground/80 max-w-sm">
+              <span className="text-foreground/70">Availability &amp; billing questions?</span> Use the booking flow or email — see below.
+            </p>
+          </div>
+          <nav className="flex flex-col items-center sm:items-end gap-3" aria-label="Footer links">
+            <div className="flex flex-wrap justify-center sm:justify-end gap-x-5 gap-y-2 text-xs">
+              <a href="mailto:alex@barcelona-sessions.com" className="text-muted-foreground hover:text-primary transition-colors">
+                alex@barcelona-sessions.com
+              </a>
+              <a
+                href="https://www.instagram.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+              >
+                Instagram <ExternalLink className="h-3 w-3 opacity-70" aria-hidden />
+              </a>
+              <a href="#practical-info" className="text-muted-foreground hover:text-primary transition-colors">
+                Practical info
+              </a>
+              <a href="#schedule" className="text-muted-foreground hover:text-primary transition-colors">
+                Schedule
+              </a>
+            </div>
+            <p className="text-[11px] text-muted-foreground/65 text-center sm:text-right max-w-xs">
+              Privacy / legal: sample placeholder — add your policy and cookie text before launch.
+            </p>
+          </nav>
         </div>
       </footer>
 

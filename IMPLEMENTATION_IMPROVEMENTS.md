@@ -46,11 +46,11 @@ Goal: modal state matches the session the user chose; forms are accessible and p
 
 Goal: clearer editorial structure without breaking the minimal dark aesthetic.
 
-- [ ] Add **eyebrow / kicker text** above major `h2` sections where it helps skimmers
-- [ ] Introduce **light section variation** (e.g. subtle background band, border, or card wrapper on one block)
-- [ ] Tune **hero image `object-position`** (and breakpoints) so crops work on narrow screens
-- [ ] **Mobile testimonials**: consider horizontal snap scroll or compact carousel (only if it improves scan time)
-- [ ] Optional: **minimal motion** on hover for schedule rows (respect `prefers-reduced-motion` if added)
+- [x] Add **eyebrow / kicker text** above major `h2` sections where it helps skimmers
+- [x] Introduce **light section variation** (e.g. subtle background band, border, or card wrapper on one block)
+- [x] Tune **hero image `object-position`** (and breakpoints) so crops work on narrow screens
+- [x] **Mobile testimonials**: consider horizontal snap scroll or compact carousel (only if it improves scan time)
+- [x] Optional: **minimal motion** on hover for schedule rows (respect `prefers-reduced-motion` if added)
 
 ---
 
@@ -58,9 +58,9 @@ Goal: clearer editorial structure without breaking the minimal dark aesthetic.
 
 Goal: reduce friction for “where is this?” without building backend.
 
-- [ ] Add **map affordance**: static map image, embedded map, or outbound links (Google Maps / Apple Maps) for studio + sample outdoor pin
-- [ ] Reserve layout for **short credentials / languages** (or “As seen in…” if applicable) near coach copy
-- [ ] Extend **footer**: social links, contact line, or legal placeholder as needed
+- [x] Add **map affordance**: static map image, embedded map, or outbound links (Google Maps / Apple Maps) for studio + sample outdoor pin
+- [x] Reserve layout for **short credentials / languages** (or “As seen in…” if applicable) near coach copy
+- [x] Extend **footer**: social links, contact line, or legal placeholder as needed
 
 ---
 
@@ -125,14 +125,14 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 | Navigation & scroll         | 5     | 5    |
 | Schedule                    | 6     | 6    |
 | Booking modal               | 6     | 6    |
-| Visual rhythm               | 5     | 0    |
-| Trust & practical info      | 3     | 0    |
+| Visual rhythm               | 5     | 5    |
+| Trust & practical info      | 3     | 3    |
 | Performance                 | 4     | 0    |
 | Accessibility & motion      | 5     | 0    |
 | SEO & meta                  | 3     | 0    |
 | 404 / global                | 3     | 0    |
 | i18n (optional)             | 4     | 0    |
-| **Total checklist items**   | **44** | **17** |
+| **Total checklist items**   | **44** | **25** |
 
 Update the **Done** column (or mark checkboxes) as you complete work. Optional i18n can stay unchecked until you commit to languages.
 

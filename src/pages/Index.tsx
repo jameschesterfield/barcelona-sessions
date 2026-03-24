@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookingModal } from "@/components/BookingModal";
+import { BookingModal, type BookableSession } from "@/components/BookingModal";
 import { cn } from "@/lib/utils";
 import { MapPin, Clock, Dumbbell, Users, ChevronRight, Quote } from "lucide-react";
 
@@ -30,6 +30,8 @@ type LocationFilter = "all" | "Studio" | "Outdoor";
 type FocusFilter = "all" | "Strength" | "Conditioning" | "Mobility";
 type DayFilter = "all" | (typeof DAY_ORDER)[number];
 
+type ScheduleRow = (typeof CLASSES)[number];
+
 const TESTIMONIALS = [
   { text: "Structured, efficient, no wasted time. Exactly what I needed.", name: "Laura", age: 31, role: "Product Manager" },
   { text: "I've trained with coaches before. Alex is the first one I've stuck with.", name: "Tom", age: 38, role: "Software Engineer" },
@@ -45,14 +47,29 @@ const focusColor = (focus: string) => {
 
 export default function Index() {
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<BookableSession | null>(null);
   const [locationFilter, setLocationFilter] = useState<LocationFilter>("all");
   const [focusFilter, setFocusFilter] = useState<FocusFilter>("all");
   const [dayFilter, setDayFilter] = useState<DayFilter>("all");
 
-  const openBooking = (className?: string) => {
-    setSelectedClass(className || null);
+  const openBooking = (row?: ScheduleRow) => {
+    setSelectedSession(
+      row
+        ? {
+            name: row.name,
+            day: row.day,
+            time: row.time,
+            location: row.location,
+            duration: row.duration,
+          }
+        : null,
+    );
     setBookingOpen(true);
+  };
+
+  const handleBookingOpenChange = (next: boolean) => {
+    setBookingOpen(next);
+    if (!next) setSelectedSession(null);
   };
 
   const filteredClasses = useMemo(() => {
@@ -299,7 +316,7 @@ export default function Index() {
                                   : `Book ${c.name} on ${c.day} at ${c.time}`
                               }
                               aria-describedby={`session-title-${slugify(c.name, c.day, c.time)}`}
-                              onClick={() => openBooking(c.name)}
+                              onClick={() => openBooking(c)}
                             >
                               {isFull ? "Full" : "Book"}
                             </Button>
@@ -446,7 +463,7 @@ export default function Index() {
         </Button>
       </div>
 
-      <BookingModal open={bookingOpen} onOpenChange={setBookingOpen} className={selectedClass} />
+      <BookingModal open={bookingOpen} onOpenChange={handleBookingOpenChange} selectedSession={selectedSession} />
     </div>
   );
 }

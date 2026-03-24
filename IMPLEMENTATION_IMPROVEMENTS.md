@@ -33,12 +33,12 @@ Goal: faster scanning, optional filtering, clearer scarcity — all with static 
 
 Goal: modal state matches the session the user chose; forms are accessible and predictable.
 
-- [ ] When opened from a schedule row, **pre-fill or constrain** date/time to that session (or show read-only session summary + adjust pickers)
-- [ ] Surface **location** (Studio vs Outdoor) in title, description, or summary line when relevant
-- [ ] Add **email** field (optional validation only; no send logic required yet)
-- [ ] Associate **labels with inputs** (`htmlFor` / `id`) for all fields
-- [ ] Define **reset behavior** on dialog close (clear vs preserve draft) and implement consistently
-- [ ] Quick pass: **focus management** and Escape/overlay behavior (Radix defaults + any custom tweaks)
+- [x] When opened from a schedule row, **pre-fill or constrain** date/time to that session (or show read-only session summary + adjust pickers)
+- [x] Surface **location** (Studio vs Outdoor) in title, description, or summary line when relevant
+- [x] Add **email** field (optional validation only; no send logic required yet)
+- [x] Associate **labels with inputs** (`htmlFor` / `id`) for all fields
+- [x] Define **reset behavior** on dialog close (clear vs preserve draft) and implement consistently
+- [x] Quick pass: **focus management** and Escape/overlay behavior (Radix defaults + any custom tweaks)
 
 ---
 
@@ -124,7 +124,7 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 |-----------------------------|-------|------|
 | Navigation & scroll         | 5     | 5    |
 | Schedule                    | 6     | 6    |
-| Booking modal               | 6     | 0    |
+| Booking modal               | 6     | 6    |
 | Visual rhythm               | 5     | 0    |
 | Trust & practical info      | 3     | 0    |
 | Performance                 | 4     | 0    |
@@ -132,7 +132,7 @@ Goal: EN / ES (or EN / ES / CA) without backend.
 | SEO & meta                  | 3     | 0    |
 | 404 / global                | 3     | 0    |
 | i18n (optional)             | 4     | 0    |
-| **Total checklist items**   | **44** | **11** |
+| **Total checklist items**   | **44** | **17** |
 
 Update the **Done** column (or mark checkboxes) as you complete work. Optional i18n can stay unchecked until you commit to languages.
 
